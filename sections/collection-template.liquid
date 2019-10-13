@@ -1,0 +1,182 @@
+{% case section.settings.grid %}
+  {% when 2 %}
+    {%- assign max_height = 530 -%}
+  {% when 3 %}
+    {%- assign max_height = 345 -%}
+  {% when 4 %}
+    {%- assign max_height = 250 -%}
+  {% when 5 %}
+    {%- assign max_height = 195 -%}
+{% endcase %}
+
+{% if section.settings.layout == 'grid' %}
+  {%- assign limit = section.settings.grid | times: section.settings.rows -%}
+{% else %}
+  {%- assign limit = 16 -%}
+{% endif %}
+
+{% assign limit = 3 %}
+{% paginate collection.products by limit %}
+
+<div id="mobile-preview">
+  <h3>This is a Mobile Only Preview</h3>
+  <p>View this page as a mobile either by using your browsers developers tools, reducing the windows width or by using a mobile device</p>
+</div>
+
+<div id="draggable-data" class="small--hide" data-collection-id="{{ collection.id }}" data-limit="{{ limit }}" data-current-page="{{ paginate.current_page }}" data-paginate-pages="{{ paginate.pages }}"></div>
+
+<div data-pagination-limit="{{ paginate.pages }}" data-section-id="{{ section.id }}" data-section-type="collection-template"></div>
+  <header class="collection-header">
+    {%- assign is_vendor_or_type_collection = false -%}
+    {%- if collection.current_type != blank or collection.current_vendor != blank -%}
+      {%- assign is_vendor_or_type_collection = true -%}
+    {%- endif -%}
+
+    <div class="page-width">
+      <div class="section-header text-center">
+        <h1>
+          <span role="text">
+            <span class="visually-hidden">{{ 'collections.general.collection_label' | t }}: </span>
+            {{ collection.title }}
+          </span>
+        </h1>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid-draggable__container" id="Collection">
+    {% include 'icon-loading' %}
+  </div>
+      <div class="hide grid-draggable__message">
+        <p>NOT A FAN?<br>SWIPE LEFT</p>
+      </div>
+      <ul class="hide--opacity grid-draggable" style="padding-bottom: calc(90vw * {{ section.settings.image_ratio }});">
+        <div id="droppable-left"></div>
+        {% for product in collection.products reversed %}
+          <li class="grid-draggable__item grid__item--{{section.id}} one--whole" {% if product.first_available_variant %} data-variant-draggable="{{ product.first_available_variant.id }}" {% endif %} data-product-draggable="{{ product.id }}" data-product-handle="{{ product.handle }}">
+            {% include 'product-card-grid', max_height: max_height %}
+          </li>
+        {% else %}
+          {% comment %}
+          Add default products to help with onboarding for collections/all only.
+
+          The onboarding styles and products are only loaded if the
+          store has no products.
+          {% endcomment %}
+          {% if collection.handle == 'all' and collection.all_vendors.size == 0 and collection.all_types.size == 0 %}
+            <li class="grid__item">
+              <div class="grid grid--uniform">
+                {% for i in (1..limit) %}
+                  <div class="grid__item {{ grid_item_width }}">
+                    <div class="grid-view-item">
+                      <a href="#" class="grid-view-item__link">
+                        <div class="grid-view-item__image">
+                          {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+                          {{ 'product-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
+                        </div>
+                        <div class="h4 grid-view-item__title">{{ 'homepage.onboarding.product_title' | t }}</div>
+                        <div class="grid-view-item__meta">
+                          <span class="product-price__price">$19.99</span>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </li>
+          {% else %}
+            {%- assign is_empty_collection = true -%}
+          {% endif %}
+        {% endfor %}
+        <div id="droppable-right"></div>
+      </ul>
+      <div class="hide grid-draggable__message grid-draggable__message--right">
+        <p>LOVE THIS?<br>SWIPE RIGHT</p>
+      </div>
+  </div>
+
+  <div class="page-width">
+      <div class="variant-container hide--opacity">
+        {% for product in collection.products reversed %}
+        <div data-product-selector="{{ product.id }}" class="variant-container__item">
+          {% if product.has_only_default_variant %}
+          <select disabled>
+            <option selected>{{ product.title }}</option>
+          </select>
+          {% else %}
+          <select class="variant-selector" data-product-selector="{{ product.id }}">
+            <option disabled>{{ product.title }}</option>
+            {% for variant in product.variants %}
+            <option {% unless variant.available %}disabled{% endunless %} value="{{ variant.id }}">
+              {% for value in product.options %}
+              {% assign option = 'option' | append: forloop.index %}
+              {{value}}: {{ variant[option] | capitalize }}
+              {% endfor %}
+            </option>
+            {% endfor %}
+          </select>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+  </div>
+
+    {% if is_empty_collection %}
+      <div class="grid__item small--text-center">
+        <p class="text-center">{{ 'collections.general.no_matches' | t }}</p>
+      </div>
+    {% endif %}
+
+    <div id="next-url" class="small--hide" data-next-url="{% if paginate.pages > 1 %}{{ paginate.next.url }}{% else %}none{% endif %}"></div>
+
+    {% if paginate.pages > 1 %}
+      {% include 'pagination' %}
+    {% endif %}
+  </div>
+  <div class="draggable-buttons__container">
+    <button disabled class="draggable-buttons__button draggable-buttons__undo-skip" id="undo-skip">{% include 'icon-draggable-redo' %}</button>
+    <button disabled class="draggable-buttons__button draggable-buttons__button--large drop-product" id="skip-product">{% include 'icon-draggable-skip' %}</button>
+    <button disabled class="draggable-buttons__button draggable-buttons__button--large drop-product" id="add-to-cart-product">{% include 'icon-draggable-cart' %}</button>
+    <button disabled class="draggable-buttons__button" id="view-product">{% include 'icon-draggable-info' %}</button>
+  </div>
+</div>
+
+
+{% endpaginate %}
+
+
+{% schema %}
+{
+  "name": "Collection Pages",
+  "settings": [
+    {
+      "type": "range",
+      "id": "image_ratio",
+      "label": "Image Ratio 1:x",
+      "min": 0.5,
+      "max": 3,
+      "step": 0.1,
+      "info": "Select the second value of your product's image dimensions (e.g. for 1x2 images select '2').",
+      "default": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_image",
+      "label": "Show Collection Image",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show Product Vendoes",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "tags_enable",
+      "label": "Enable Tage Filtering",
+      "default": true
+    }
+  ]
+}
+{% endschema %}
