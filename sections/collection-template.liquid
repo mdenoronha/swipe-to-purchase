@@ -15,13 +15,8 @@
   {%- assign limit = 16 -%}
 {% endif %}
 
-{% assign limit = 3 %}
 {% paginate collection.products by limit %}
 
-<div id="mobile-preview">
-  <h3>This is a Mobile Only Preview</h3>
-  <p>View this page as a mobile either by using your browsers developers tools, reducing the windows width or by using a mobile device</p>
-</div>
 
 <div id="draggable-data" class="small--hide" data-collection-id="{{ collection.id }}" data-limit="{{ limit }}" data-current-page="{{ paginate.current_page }}" data-paginate-pages="{{ paginate.pages }}"></div>
 
@@ -110,7 +105,7 @@
             <option {% unless variant.available %}disabled{% endunless %} value="{{ variant.id }}">
               {% for value in product.options %}
               {% assign option = 'option' | append: forloop.index %}
-              {{value}}: {{ variant[option] | capitalize }}
+              {{value | capitalize}}: {{ variant[option] | capitalize }}
               {% endfor %}
             </option>
             {% endfor %}

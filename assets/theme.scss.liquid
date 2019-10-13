@@ -4564,6 +4564,13 @@ $color-blankstate-background: rgba($color-body-text, 0.1);
   }
 }
 
+.site-header__cart {
+  position: absolute;
+  display: flex;
+  right: 0;
+  padding: 10px;
+}
+
 @include media-query($medium-up) {
   .site-header__account,
   .site-header__cart {
@@ -5268,6 +5275,12 @@ $nav-button-padding: 15px;
   @include media-query($small) {
     @include display-flexbox();
     @include align-items(center);
+  }
+
+  img {
+    max-width: 200px;
+    margin: 0 auto;
+    padding: 5px;
   }
 }
 

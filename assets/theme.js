@@ -2984,7 +2984,8 @@ theme.Collection = (function() {
     dropProduct: '.drop-product',
     viewProduct: '#view-product',
     loadingContainer: '#loading-container',
-    draggableButtonsContainer: '.draggable-buttons__container'
+    draggableButtonsContainer: '.draggable-buttons__container',
+    cartIcon: '.site-header__cart'
   }
 
   function Collection(container) {
@@ -3046,8 +3047,15 @@ theme.Collection = (function() {
         try {
           var variantId = parseInt(ui.draggable[0].attributes[selectors.variantDraggable].value)
         } catch {
-          console.log("product sold out")
+          $(selectors.cartIcon + ' svg').css('fill', "red")
+          setTimeout(function(){
+           $(selectors.cartIcon + ' svg').css('fill', "currentColor")
+          }, 3000);
         } finally {
+          $(selectors.cartIcon + ' svg').css('fill', "green")
+          setTimeout(function(){
+           $(selectors.cartIcon + ' svg').css('fill', "currentColor")
+          }, 1500);
           jQuery.post('/cart/add.js', {
             quantity: 1,
             id: variantId,
@@ -3061,13 +3069,12 @@ theme.Collection = (function() {
       // Save item to sessionstorage to retrieve
       let collectionId = $('#draggable-data').attr('data-collection-id');
 
-      // var productToAdd = sessionStorage.undoSkip ? sessionStorage.undoSkip + ',' + productHandle : productHandle
-      // sessionStorage.undoSkip = productToAdd;
       if($(selectors.gridDraggable + ' li').length < 3) {
         self._retrieveProducts()
         self._setSession(collectionId, 'skipProducts', productId)
         self._setSession(collectionId, 'undoSkip', productHandle)
       } else {
+        self._setSession(collectionId, 'skipProducts', productId)
         $.ajax({
           success: function(){
             $.ajax({
